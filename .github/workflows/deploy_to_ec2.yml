@@ -32,7 +32,7 @@ jobs:
         continue-on-error: true
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: oryon-back
+          ECR_REPOSITORY: oryon_back
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build a docker container and
@@ -49,7 +49,6 @@ jobs:
           INSTANCE_STOPPED: "stopped"
           INSTANCE_NAME: "oryon_back"
         run: |
-          INSTANCE_NAME=${{ vars.INSTANCE_NAME }}
           INSTANCES_INFO=$(aws ec2 describe-instances \
                      --filters "Name=tag:Name,Values=$INSTANCE_NAME" \
                      --query 'Reservations[].Instances[].{PublicDnsName:PublicDnsName, PublicIpAddress:PublicIpAddress, Name:Tags[?Key==`Name`].Value | [0], State:State.Name}' \
