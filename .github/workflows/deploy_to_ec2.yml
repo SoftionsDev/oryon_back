@@ -3,8 +3,6 @@ name: Deploy
 on:
   push:
     branches: [ "dev" ]
-  pull_request:
-    branches: [ "dev" ]
 
 jobs:
   deploy:
@@ -91,6 +89,6 @@ jobs:
             sudo chmod o+x /home/ubuntu
             sudo chmod o+x ${{ env.REMOTE_DIR }}
             sudo chown -R www-data:www-data ${{ env.REMOTE_DIR }}
-            sudo docker compose up --build -d --no-cache
+            docker compose up --build -d --no-cache
             echo ${{ env.public_dns}}
             echo "Deployed successfully!"
