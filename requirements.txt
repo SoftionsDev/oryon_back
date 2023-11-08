@@ -1,6 +1,8 @@
 Django==4.2.6
 djangorestframework==3.14.0
-djangorestframework-simplejwt==4.8.0
+djangorestframework-simplejwt
 django-extensions
 psycopg2-binary
 pillow
+ipython
+pdbpp

@@ -2,7 +2,7 @@ from rest_framework import viewsets
 
 from sales.models import Sale
 from sales.serializers import SaleSerializer
-from utils.permissions import IsManager, IsCommercial
+from utils.permissions import IsManager, IsCollaborator
 
 
 class SaleViewSet(viewsets.ModelViewSet):
@@ -11,7 +11,7 @@ class SaleViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsManager, IsCommercial]
+            permission_classes = [IsManager, IsCollaborator]
         else:
             permission_classes = []
         return [permission() for permission in permission_classes]
