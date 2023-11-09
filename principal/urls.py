@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import path, include
 
 urlpatterns = [
-    path('api/products/', include('products.urls')),  # adjust the path as needed
+    path('api/products/', include('products.urls')),
     path('api/stores/', include('stores.urls')),
     path('api/sales/ ', include('sales.urls')),
     path('api/users/', include('users.urls')),
