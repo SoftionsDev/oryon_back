@@ -1,8 +1,11 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import ProductViewSet
+from .views import ProductViewSet, ProductUploadView
 
 router = DefaultRouter()
-router.register(r'products', ProductViewSet)
+router.register(r'', ProductViewSet)
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('upload-products/', ProductUploadView.as_view(), name='upload-products'),
+] + router.urls
 
