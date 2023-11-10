@@ -33,5 +33,5 @@ COPY ./database_healthcheck.sh /tmp/
 WORKDIR /app
 ENTRYPOINT ["bash", "/tmp/database_healthcheck.sh"]
 
-CMD python manage.py runserver 0:8000
+CMD python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000
 
