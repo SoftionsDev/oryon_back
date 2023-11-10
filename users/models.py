@@ -2,6 +2,9 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin, Group
 from django.db import models
 
+from principal.base_models import BaseModel
+from users.constants import GoalTypes
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -39,3 +42,31 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = 'users'
+
+    @property
+    def is_admin(self):
+        return self.groups.filter(name='admin').exists()
+
+
+class Commercial(BaseModel):
+
+    GOAL_TYPES_CHOICES = (
+        ('D', GoalTypes.DAILY),
+        ('M', GoalTypes.MONTHLY),
+        ('Y', GoalTypes.YEARLY),
+    )
+
+    user: User = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name='commercial'
+    )
+    manager: User = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='commercials', null=True, blank=True
+    )
+    goal_type = models.CharField(max_length=100, choices=GOAL_TYPES_CHOICES)
+    goal = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        db_table = "commercials"
+
+    def __str__(self):
+        return self.user.email
