@@ -38,7 +38,7 @@ jobs:
           # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Check EC2 Instance
         id: check-ec2-instance
@@ -71,9 +71,11 @@ jobs:
           # Use AWS CLI or SDK to create an EC2 instance
           # Set environment variables or outputs for later steps
 
-      - name: Deploy to EC2 to SCP
+      - name: Deploy to EC2 Docker image
         env:
           REMOTE_DIR: "/home/ubuntu/oryon_back"
+          ENVS_BUCKET: "oryon-dev-envs"
+          ENVS_FILE: ".env"
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -82,13 +84,15 @@ jobs:
           SOURCE: "."
           TARGET: ${{ env.REMOTE_DIR }}
           SCRIPT_BEFORE: |
+            docker stop $(docker ps -q)
             sudo rm -rf ${{ env.REMOTE_DIR }}
             sudo mkdir -p ${{ env.REMOTE_DIR }}
             sudo chown ubuntu:ubuntu ${{ env.REMOTE_DIR }}
           SCRIPT_AFTER: |
-            sudo chmod o+x /home/ubuntu
-            sudo chmod o+x ${{ env.REMOTE_DIR }}
-            sudo chown -R www-data:www-data ${{ env.REMOTE_DIR }}
-            docker compose up --build -d --no-cache
-            echo ${{ env.public_dns}}
+            cd ${{ env.REMOTE_DIR }}
+            aws s3 cp s3://${BUCKET_NAME}/${ENVS_FILE} ./${ENVS_FILE}
+            aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com
+            docker pull ${{ env.image }}
+            docker run -d -p 80:80 -p 443:443 --env-file ${ENVS_FILE} --name oryon_back ${{ env.image }}
+            echo -e "\033[0;32m${{ env.public_dns}}\033[0m"
             echo "Deployed successfully!"
