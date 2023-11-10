@@ -1,8 +1,8 @@
 name: "Check for stop and start EC2 Instances"
 on:
   schedule:
-    - cron: "0 9 * * *"
-    - cron: "0 22 * * *"
+    - cron: "0 14 * * *"
+    - cron: "0 22 27 * *"
 
 jobs:
   check_ec2:
