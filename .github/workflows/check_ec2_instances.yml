@@ -1,0 +1,59 @@
+name: "Check for stop and start EC2 Instances"
+on:
+  schedule:
+    - cron: "0 9 * * *"
+    - cron: "0 22 * * *"
+
+jobs:
+  check_ec2:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Start instances
+        if: github.event_name == 'schedule' && github.event.schedule == '0 9 * * *'
+        run: |
+          INSTANCES_INFO=$(aws ec2 describe-instances \
+                     --filters "Name=tag:Name,Values=$INSTANCE_NAME" \
+                     --query 'Reservations[].Instances[].{PublicDnsName:PublicDnsName, PublicIpAddress:PublicIpAddress, Name:Tags[?Key==`Name`].Value | [0], State:State.Name}' \
+                     --output json
+                 )
+          INSTANCE_STATE=$(echo $INSTANCES_INFO | jq -r '.[0].State')
+          if [ "$INSTANCE_STATE" == "running" ]; then
+            echo "Instance is running."
+            echo "public_dns=$(echo $INSTANCES_INFO | jq -r '.[0].PublicDnsName')" >> $GITHUB_ENV
+          else
+            echo "Instance is not running. Starting the instance..."
+            INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$INSTANCE_NAME" --query "Reservations[*].Instances[*].InstanceId" --output text)
+            aws ec2 start-instances --instance-ids $INSTANCE_ID
+            echo "instance_running=true" >> $GITHUB_ENV
+            echo "public_dns=$(echo $INSTANCES_INFO | jq -r '.[0].PublicDnsName')" >> $GITHUB_ENV
+          
+      - name: Stop instances
+        if: github.event_name == 'schedule' && github.event.schedule == '0 22 * * *'
+        run: |
+            INSTANCES_INFO=$(aws ec2 describe-instances \
+                         --filters "Name=tag:Name,Values=$INSTANCE_NAME" \
+                         --query 'Reservations[].Instances[].{PublicDnsName:PublicDnsName, PublicIpAddress:PublicIpAddress, Name:Tags[?Key==`Name`].Value | [0], State:State.Name}' \
+                         --output json
+                     )
+            INSTANCE_STATE=$(echo $INSTANCES_INFO | jq -r '.[0].State')
+            if [ "$INSTANCE_STATE" == "stopped" ]; then
+                echo "Instance is stopped."
+                echo "public_dns=$(echo $INSTANCES_INFO | jq -r '.[0].PublicDnsName')" >> $GITHUB_ENV
+            else
+                echo "Instance is not stopped. Stopping the instance..."
+                INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$INSTANCE_NAME" --query "Reservations[*].Instances[*].InstanceId" --output text)
+                aws ec2 stop-instances --instance-ids $INSTANCE_ID
+                echo "instance_running=true" >> $GITHUB_ENV
