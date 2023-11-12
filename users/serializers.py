@@ -2,9 +2,10 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from users.models import User, Commercial
+from utils.serializers import SelectableFieldsModelSerializer
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(SelectableFieldsModelSerializer):
 
     class Meta:
         model = User

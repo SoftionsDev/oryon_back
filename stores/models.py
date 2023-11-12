@@ -18,7 +18,7 @@ class Region(BaseModel):
         return self.name
 
 class City(BaseModel):
-    code = models.CharField(max_length=20, unique=True, primary_key=True)
+    code = models.CharField(primary_key=True, max_length=20, unique=True)
     name = models.CharField(max_length=255)
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name="cities")
     manager = models.OneToOneField(

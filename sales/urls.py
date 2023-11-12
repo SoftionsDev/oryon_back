@@ -1,8 +1,8 @@
-from rest_framework.routers import DefaultRouter
+from django.urls import path
+from sales import views
 
-from sales.views import SaleViewSet
+urlpatterns = [
+    path('', views.SalesViews.as_view(), name='sales'),
+    path('upload/', views.SalesCreateBatch.as_view(), name='upload-sales'),
+]
 
-router = DefaultRouter()
-router.register(r'', SaleViewSet)
-
-urlpatterns = router.urls

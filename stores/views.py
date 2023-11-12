@@ -8,7 +8,7 @@ from utils.permissions import IsManager, IsAdmin
 class BaseView(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAdmin, IsManager]
+            permission_classes = [IsAdmin|IsManager]
         else:
             permission_classes = []
         return [permission() for permission in permission_classes]

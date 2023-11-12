@@ -6,6 +6,6 @@ router = DefaultRouter()
 router.register(r'', ProductViewSet)
 
 urlpatterns = [
-    path('upload-products/', ProductUploadView.as_view(), name='upload-products'),
+    path('upload/', ProductUploadView.as_view(), name='upload-products'),
 ] + router.urls
 
