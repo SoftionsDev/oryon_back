@@ -47,6 +47,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_admin(self):
         return self.groups.filter(name='admin').exists()
 
+    @property
+    def is_manager(self):
+        return self.groups.filter(name='manager').exists()
+
 
 class Commercial(BaseModel):
 

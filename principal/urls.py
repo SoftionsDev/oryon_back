@@ -22,5 +22,6 @@ urlpatterns = [
     path('api/sales/', include('sales.urls')),
     path('api/users/', include('users.user_urls')),
     path('api/commercials/', include('users.commercial_urls')),
-    path('api/commissions/', include('commissions.urls'))
+    path('api/commissions/', include('commissions.urls')),
+    path('api/rules/', include('brm.urls')),
 ]

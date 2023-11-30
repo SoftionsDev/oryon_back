@@ -1,0 +1,3 @@
+
+class InvalidExpression(Exception):
+    pass

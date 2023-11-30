@@ -1,43 +1,83 @@
 from rest_framework import serializers
 from stores.models import Region, City, Store
+from users.models import User
 from users.serializers import UserSerializer
 from utils.serializers import SelectableFieldsModelSerializer
 
 
-class RegionSerializer(SelectableFieldsModelSerializer):
+class RegionReadSerializer(SelectableFieldsModelSerializer):
+
+    manager = UserSerializer(read_only=True, context={'fields': ['code', 'email']})
+
     class Meta:
         model = Region
         fields = ('code', 'name', 'manager')
 
-class CitySerializer(SelectableFieldsModelSerializer):
-    region_info = RegionSerializer(read_only=True)
-    region = serializers.PrimaryKeyRelatedField(queryset=Region.objects.all(), write_only=True)
+class RegionWriteSerializer(serializers.Serializer):
+
+    code = serializers.CharField(max_length=10)
+    name = serializers.CharField(max_length=100)
+    manager = serializers.SlugRelatedField(
+        queryset=User.objects.filter(groups__name__in=['manager', 'admin']),
+        slug_field='code',
+        write_only=True
+    )
+
+    def create(self, validated_data):
+        return Region.objects.create(**validated_data)
+
+
+class CityReadSerializer(SelectableFieldsModelSerializer):
+    region = RegionReadSerializer(read_only=True, context={'fields': ['code', 'name']})
+    manager = UserSerializer(read_only=True, context={'fields': ['code', 'email']})
 
     class Meta:
         model = City
-        fields = ('code', 'name', 'manager', 'region', 'region_info')
+        fields = ('code', 'name', 'manager', 'region')
 
-class StoreSerializer(SelectableFieldsModelSerializer):
-    city_info = serializers.SerializerMethodField(read_only=True)
-    region_info = serializers.SerializerMethodField(read_only=True)
-    manager_info = serializers.SerializerMethodField(read_only=True)
-    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all(), write_only=True)
+class CityWriteSerializer(serializers.Serializer):
+
+    code = serializers.CharField(max_length=10)
+    name = serializers.CharField(max_length=100)
+    manager = serializers.SlugRelatedField(
+        queryset=User.objects.filter(groups__name__in=['manager', 'admin']),
+        slug_field='code',
+        write_only=True
+    )
+    region = serializers.SlugRelatedField(
+        queryset=Region.objects.all(),
+        slug_field='code',
+        write_only=True
+    )
+
+    def create(self, validated_data):
+        return City.objects.create(**validated_data)
+
+
+class StoreReadSerializer(SelectableFieldsModelSerializer):
+
+    manager = UserSerializer(read_only=True, context={'fields': ['code', 'email']})
+    city = CityReadSerializer(read_only=True, context={'fields': ['code', 'name']})
 
     class Meta:
         model = Store
-        fields = ('code', 'name', 'manager', 'city', 'city_info', 'region_info', 'manager_info')
+        fields = ('code', 'name', 'manager', 'city')
 
-    def get_region_info(self, obj):
-        desired_fields = ['code', 'name']
-        serializer = RegionSerializer(obj.city.region, context={'fields': desired_fields})
-        return serializer.data
 
-    def get_city_info(self, obj):
-        desired_fields = ['code', 'name']
-        serializer = CitySerializer(obj.city, context={'fields': desired_fields})
-        return serializer.data
+class StoreWriteSerializer(serializers.Serializer):
 
-    def get_manager_info(self, obj):
-        desired_fields = ['code', 'email']
-        serializer = UserSerializer(obj.manager, context={'fields': desired_fields})
-        return serializer.data
+    code = serializers.CharField(max_length=10)
+    name = serializers.CharField(max_length=100)
+    manager = serializers.SlugRelatedField(
+        queryset=User.objects.filter(groups__name__in=['manager', 'admin']),
+        slug_field='code',
+        write_only=True
+    )
+    city = serializers.SlugRelatedField(
+        queryset=City.objects.all(),
+        slug_field='code',
+        write_only=True
+    )
+
+    def create(self, validated_data):
+        return Store.objects.create(**validated_data)

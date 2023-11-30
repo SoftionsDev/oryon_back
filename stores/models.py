@@ -7,7 +7,7 @@ from django.db import models
 class Region(BaseModel):
     code = models.CharField(max_length=20, unique=True, primary_key=True)
     name = models.CharField(max_length=255)
-    manager = models.OneToOneField(
+    manager = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
@@ -21,7 +21,7 @@ class City(BaseModel):
     code = models.CharField(primary_key=True, max_length=20, unique=True)
     name = models.CharField(max_length=255)
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name="cities")
-    manager = models.OneToOneField(
+    manager = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
@@ -38,7 +38,7 @@ class Store(BaseModel):
         City, on_delete=models.CASCADE, related_name="stores"
     )
     address = models.TextField()
-    manager = models.OneToOneField(
+    manager = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name='store_manager'
     )
 
