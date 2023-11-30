@@ -6,7 +6,7 @@ from sales.models import Sale
 from rest_framework import serializers
 
 from stores.models import Store
-from stores.serializers import StoreSerializer
+from stores.serializers import StoreReadSerializer
 from users.models import User
 from users.serializers import UserSerializer
 from utils.serializers import CustomDecimalField
@@ -29,7 +29,7 @@ class SaleReadSerializer(serializers.ModelSerializer):
 
     def get_store(self, obj):
         desired_fields = ['code', 'name']
-        serializer = StoreSerializer(obj.store, context={'fields': desired_fields})
+        serializer = StoreReadSerializer(obj.store, context={'fields': desired_fields})
         return serializer.data
 
     def get_product(self, obj):

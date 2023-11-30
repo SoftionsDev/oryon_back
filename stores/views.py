@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 
 from stores.models import Store, Region, City
-from stores.serializers import StoreSerializer, RegionSerializer, CitySerializer
+from stores import serializers
 from utils.permissions import IsManager, IsAdmin
 
 
@@ -16,14 +16,26 @@ class BaseView(viewsets.ModelViewSet):
 
 class RegionalViewSet(BaseView):
     queryset = Region.objects.all()
-    serializer_class = RegionSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return serializers.RegionWriteSerializer
+        return serializers.RegionReadSerializer
 
 
 class CityViewSet(BaseView):
     queryset = City.objects.all()
-    serializer_class = CitySerializer
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return serializers.CityWriteSerializer
+        return serializers.CityReadSerializer
 
 
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.select_related('city', 'city__region').all()
-    serializer_class = StoreSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return serializers.StoreWriteSerializer
+        return serializers.StoreReadSerializer
