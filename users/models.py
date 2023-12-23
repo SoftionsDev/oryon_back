@@ -3,7 +3,7 @@ from django.contrib.auth.models import PermissionsMixin, Group
 from django.db import models
 
 from principal.base_models import BaseModel
-from users.constants import GoalTypes
+from users.constants import GoalTypes, Positions
 
 
 class UserManager(BaseUserManager):
@@ -24,6 +24,9 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+
+    POSITIONS_CHOICES = ((tag.name, tag.value) for tag in Positions)
+
     code = models.CharField(max_length=100, unique=True, primary_key=True)
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=30, blank=True)
@@ -31,7 +34,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    position = models.CharField(max_length=100, blank=True, null=True)
+    position = models.CharField(
+        max_length=100,
+        choices=POSITIONS_CHOICES,
+    )
     photo = models.ImageField(upload_to='user_photos/', null=True, blank=True)
     groups = models.ManyToManyField(Group, blank=True)
 
