@@ -12,3 +12,9 @@ class GoalTypes(str, Enum):
     DAILY = 'daily'
     MONTHLY = 'monthly'
     YEARLY = 'yearly'
+
+
+class Positions(Enum):
+    DIRECTOR = 'director'
+    ADVISER = 'asesor'
+    ASSISTANT = 'asistente'

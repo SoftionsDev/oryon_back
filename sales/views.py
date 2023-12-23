@@ -19,7 +19,7 @@ class SalesViews(APIView):
 
     def get(self, request):
         sales = Sale.objects.select_related(
-            'commercial', 'product', 'commercial', 'store'
+            'user', 'product', 'store'
         ).all()
         serializer = SaleReadSerializer(sales, many=True)
         return Response(serializer.data)
