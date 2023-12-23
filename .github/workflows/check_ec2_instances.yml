@@ -19,9 +19,11 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Start instances
+        env:
+          INSTANCE_NAME: "oryon_back"
         if: github.event_name == 'schedule' && github.event.schedule == '0 9 * * *'
         run: |
           INSTANCES_INFO=$(aws ec2 describe-instances \
@@ -41,6 +43,8 @@ jobs:
             echo "public_dns=$(echo $INSTANCES_INFO | jq -r '.[0].PublicDnsName')" >> $GITHUB_ENV
           
       - name: Stop instances
+        env:
+          INSTANCE_NAME: "oryon_back"
         if: github.event_name == 'schedule' && github.event.schedule == '0 22 * * *'
         run: |
             INSTANCES_INFO=$(aws ec2 describe-instances \
