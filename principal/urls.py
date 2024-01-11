@@ -24,4 +24,5 @@ urlpatterns = [
     path('api/commercials/', include('users.commercial_urls')),
     path('api/commissions/', include('commissions.urls')),
     path('api/rules/', include('brm.urls')),
+    path('api/utils/', include('utils.urls'))
 ]

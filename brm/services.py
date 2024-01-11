@@ -240,11 +240,14 @@ class RuleHandler:
     def _evaluate_comparison(self, expression, sale: Sale):
         left, operand, right = expression
         left = data_lookup(left, sale)
+        if isinstance(left, str):
+            left = left.lower()
         if isinstance(left, Decimal):
             right = Decimal(right)
 
         operand = COMPARISON_FUNCTIONS.get(operand)
         return operand(left, right)
+
 
 class FormulaValidator:
 

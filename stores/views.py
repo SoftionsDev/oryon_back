@@ -16,6 +16,7 @@ class BaseView(viewsets.ModelViewSet):
 
 class RegionalViewSet(BaseView):
     queryset = Region.objects.all()
+    permission_classes = [IsAdmin | IsManager]
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:

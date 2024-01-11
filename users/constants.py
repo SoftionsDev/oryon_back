@@ -15,6 +15,7 @@ class GoalTypes(str, Enum):
 
 
 class Positions(Enum):
+    MANAGER = 'gerente'
     DIRECTOR = 'director'
     ADVISER = 'asesor'
     ASSISTANT = 'asistente'

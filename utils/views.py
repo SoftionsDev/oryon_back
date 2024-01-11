@@ -1,10 +1,14 @@
 import csv
 import io
 
+from django.apps import apps
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from users.models import User
+from utils.permissions import IsAdmin, IsManager
 
 
 class UploadCSV(APIView):
@@ -47,5 +51,31 @@ class UploadCSV(APIView):
 
         return Response(status=status.HTTP_201_CREATED)
 
-    def process_data(self, data):
-        raise NotImplementedError('process_data method must be implemented')
+
+class Fields(APIView):
+    permission_classes = [IsAdmin | IsManager]
+
+    def get(self, request, format=None):
+        models = apps.get_models()
+        model_fields = {}
+
+        excluded_fields = {
+            'User': [
+                'password', 'last_login', 'is_superuser', 'is_staff', 'photo'
+            ],
+            'Sale': ['created_at', 'updated_at'],
+        }
+
+        for model in models:
+            if 'django.' in str(model) and model != User:
+                continue
+
+            model_name = model.__name__
+            fields = [
+                field.name for field in model._meta.fields
+                if field.name not in excluded_fields.get(model_name, [])
+                and field.get_internal_type() != 'ForeignKey'
+            ]
+            model_fields[model_name] = fields
+
+        return Response(model_fields)

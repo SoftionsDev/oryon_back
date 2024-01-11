@@ -73,7 +73,7 @@ class Commercial(BaseModel):
         User, on_delete=models.CASCADE, related_name='commercials', null=True, blank=True
     )
     goal_type = models.CharField(max_length=100, choices=GOAL_TYPES_CHOICES)
-    goal = models.DecimalField(max_digits=10, decimal_places=2)
+    goal = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
         db_table = "commercials"

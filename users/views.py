@@ -1,3 +1,6 @@
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -11,7 +14,14 @@ class UserViewSet(ModelViewSet):
     model = User
     serializer_class = UserSerializer
     queryset = User.objects.prefetch_related('groups').all()
-    permission_classes = [IsAdmin|IsManager]
+    permission_classes = [IsAdmin | IsManager]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.code == request.user.code:
+            raise ValidationError('Cannot delete itself')
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserToken(TokenObtainPairView):
@@ -23,7 +33,7 @@ class CommercialViewSet(ModelViewSet):
     model = Commercial
     serializer_class = CommercialSerializer
     queryset = Commercial.objects.select_related('user', 'manager').all()
-    permission_classes = [IsAdmin|IsManager]
+    permission_classes = [IsAdmin | IsManager]
     lookup_field = 'user__email'
 
     def get_queryset(self):

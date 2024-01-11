@@ -12,7 +12,8 @@ class UserSerializer(SelectableFieldsModelSerializer):
         fields = (
             'code', 'email', 'first_name',
             'last_name', 'position', 'is_active',
-            'groups', 'user_permissions', 'password'
+            'groups', 'user_permissions', 'password',
+            'date_joined'
         )
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -32,6 +33,7 @@ class UserSerializer(SelectableFieldsModelSerializer):
         user.user_permissions.set(permissions)
         return user
 
+
 class TokenSerializer(TokenObtainPairSerializer):
 
     @classmethod
@@ -47,6 +49,7 @@ class TokenSerializer(TokenObtainPairSerializer):
         token['groups'] = list(user.groups.values_list('id', flat=True))
 
         return token
+
 
 class CommercialSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)

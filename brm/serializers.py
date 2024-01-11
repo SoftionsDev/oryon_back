@@ -28,7 +28,7 @@ class RuleWriteSerializer(serializers.Serializer):
             validator.validate_expression(value)
         except Exception as e:
             raise ValidationError('rule does not compliant the requirements')
-        return value
+        return value.lower()
 
     def validate_formula(self, value):
         validator = FormulaValidator()
@@ -36,7 +36,7 @@ class RuleWriteSerializer(serializers.Serializer):
             validator.validate_expression(value)
         except Exception as e:
             raise ValidationError('formula does not compliant the requirements')
-        return value
+        return value.lower()
 
     def save(self, **kwargs):
         validated_data = self.validated_data
