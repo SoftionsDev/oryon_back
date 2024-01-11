@@ -13,6 +13,7 @@ class RegionReadSerializer(SelectableFieldsModelSerializer):
         model = Region
         fields = ('code', 'name', 'manager')
 
+
 class RegionWriteSerializer(serializers.Serializer):
 
     code = serializers.CharField(max_length=10)
@@ -34,6 +35,7 @@ class CityReadSerializer(SelectableFieldsModelSerializer):
     class Meta:
         model = City
         fields = ('code', 'name', 'manager', 'region')
+
 
 class CityWriteSerializer(serializers.Serializer):
 
@@ -80,4 +82,8 @@ class StoreWriteSerializer(serializers.Serializer):
     )
 
     def create(self, validated_data):
-        return Store.objects.create(**validated_data)
+        try:
+            store = Store.objects.create(**validated_data)
+            return store
+        except Exception as e:
+            raise serializers.ValidationError(str(e))

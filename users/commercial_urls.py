@@ -7,8 +7,8 @@ router.register(r'', CommercialViewSet)
 
 urlpatterns = [
     re_path(
-        r'(?P<user__email>[\w\.-]+@[\w\.-]+\.\w+)$',
-        CommercialViewSet.as_view({'get': 'retrieve'}),
+        r'(?P<user__email>[\w\.-]+@[\w\.-]+\.\w+)',
+        CommercialViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}),
         name='commercial-detail'
     )
 ] + router.urls

@@ -14,10 +14,16 @@ class RuleViews(APIView):
         serializer = RuleReadSerializer(Rule.objects.all(), many=True)
         return Response(serializer.data)
 
-
     def post(self, request, *args, **kwargs):
         serializer = RuleWriteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         message = {'message': 'Rule is valid and formula created'}
         return Response(message, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, id=None):
+        rule = Rule.objects.filter(id=id).first()
+        if not rule:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        rule.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
