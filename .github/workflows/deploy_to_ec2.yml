@@ -88,10 +88,10 @@ jobs:
           #  sudo rm -rf ${{ env.REMOTE_DIR }}
           #  sudo mkdir -p ${{ env.REMOTE_DIR }}
           #  sudo chown ubuntu:ubuntu ${{ env.REMOTE_DIR }}
-            docker compose down
-            sudo rm -rf ${{ env.REMOTE_DIR }}
-            sudo mkdir -p ${{ env.REMOTE_DIR }}
-            sudo chown ubuntu:ubuntu ${{ env.REMOTE_DIR }}
+             docker compose down
+             sudo rm -rf ${{ env.REMOTE_DIR }}
+             sudo mkdir -p ${{ env.REMOTE_DIR }}
+             sudo chown ubuntu:ubuntu ${{ env.REMOTE_DIR }}
           SCRIPT_AFTER: |
           #  cd ${{ env.REMOTE_DIR }}
           #  aws s3 cp s3://${{ env.ENVS_BUCKET_NAME }}/${{ env.ENVS_FILE }} ./${{ env.ENVS_FILE }}
@@ -100,9 +100,9 @@ jobs:
           #  docker run -d -p 80:8000 --env-file ${{ env.ENVS_FILE }} ${{ env.image }}
           #  echo -e "\033[0;32m${{ env.public_dns}}\033[0m"
           #  echo "Deployed successfully!"
-            cd ${{ env.REMOTE_DIR }}
-            aws s3 cp s3://${{ env.ENVS_BUCKET_NAME }}/${{ env.ENVS_FILE }} ./${{ env.ENVS_FILE }}
-            docker compose build
-            docker compose up -d
-            echo -e "\033[0;32m${{ env.public_dns}}\033[0m"
-            echo "Deployed successfully!"
+             cd ${{ env.REMOTE_DIR }}
+             aws s3 cp s3://${{ env.ENVS_BUCKET_NAME }}/${{ env.ENVS_FILE }} ./${{ env.ENVS_FILE }}
+             docker compose build
+             docker compose up -d
+             echo -e "\033[0;32m${{ env.public_dns}}\033[0m"
+             echo "Deployed successfully!"
