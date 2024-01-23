@@ -1,13 +1,13 @@
 import logging
 from decimal import Decimal
-from typing import Callable, Any
+from typing import Callable, Any, Union
 
 from django.apps import apps
 from pyparsing import Word, alphanums, nums, oneOf, infixNotation, opAssoc, OneOrMore, Combine, \
     Optional, ParseResults, Literal, Group, ParseException, pyparsing_common, alphas, quotedString, removeQuotes
 
 from brm.exceptions import InvalidExpression
-from brm.models import Rule
+from brm.models import Percentages, Formula
 from sales.models import Sale
 
 logger = logging.getLogger(__name__)
@@ -151,7 +151,7 @@ def is_compound_expression(expression):
 
 
 
-class ExpressionValidator:
+class RuleValidator:
 
     active_rules: list = []
     default_exception = 'rule has not a proper structure'
@@ -161,35 +161,39 @@ class ExpressionValidator:
         self.__pre_load_active_rules()
 
     def __pre_load_active_rules(self):
-        for rule in Rule.objects.all():
-            [_rule] = self.validator_parser.parse_string(rule.expression)
+        for percentage in Percentages.objects.all():
+            [_rule] = self.validator_parser.parse_string(percentage.rule)
             self.active_rules.append(_rule)
 
-    def validate(self, parsed_rule: list[ParseResults]):
-        for expression in parsed_rule:
-            if not isinstance(expression, ParseResults):
-                continue
-
+    def validate(self, parsed_rule: Union[ParseResults, list[ParseResults]]):
+        def _validate(_parsed_rule: ParseResults):
             # validates if there is a rule with the same expression
             if any(
-                expression.as_list() in rule.as_list()
+                _parsed_rule.as_list() in rule.as_list()
                 for rule in self.active_rules
             ):
-                msg = f'expression {expression.as_list()} is already contained in another rule'
+                msg = f'expression {_parsed_rule.as_list()} is already contained in another rule'
                 logger.exception(msg)
                 raise InvalidExpression(msg)
 
-            model, field = expression[0].split('.')
+            model, field = _parsed_rule[0].split('.')
             model_fields = get_model_fields(model)
             if not model_fields:
                 logger.exception(self.default_exception)
                 raise InvalidExpression(self.default_exception)
             if field in model_fields:
-                continue
+                return
             raise InvalidExpression(self.default_exception)
+
+        if not is_compound_expression(parsed_rule):
+            _validate(parsed_rule)
+
+        for rule in parsed_rule:
+            _validate(rule)
 
     def validate_expression(self, rule):
         try:
+            breakpoint()
             [parsed_rule] = self.validator_parser.parse_string(rule)
             self.validate(parsed_rule)
             return parsed_rule
@@ -205,11 +209,11 @@ class RuleHandler:
         self.data_lookup = data_lookup
         self.parser = rule_parser()
 
-    def parse(self, rule: Rule):
-        if not isinstance(rule, Rule):
+    def parse(self, percentage: Percentages):
+        if not isinstance(percentage, Percentages):
             raise TypeError('rule must be an instance of Rule')
         try:
-            [expression] = self.parser.parse_string(rule.expression)
+            [expression] = self.parser.parse_string(percentage.rule)
             return expression
         except ParseException as e:
             logger.error('rule execution error')
@@ -284,24 +288,26 @@ class FormulaHandler:
         self.parser = formula_parser()
         self.data_lookup = data_lookup
 
-    def parse(self, rule: Rule):
+    def parse(self, formula: Formula):
         try:
-            parsed_formula = self.parser.parse_string(rule.formula, parseAll=True)
-            return self.load_percentages(parsed_formula, rule)
+            _formula = formula.formula
+            parsed_formula = self.parser.parse_string(_formula, parseAll=True)
+            return self.load_percentages(parsed_formula, formula)
         except ParseException as e:
             logger.exception(str(e))
             logger.error('formula execution error')
             raise
 
-    def load_percentages(self, parsed_formula, rule):
+    def load_percentages(self, parsed_formula: ParseResults, formula: Formula):
+        # TODO fix this method to allow different types of formulas
         for element in range(1, len(parsed_formula)):
-            formula = parsed_formula[element].as_list()
-            index = formula.index('rule.percentage')
-            try:
-                formula[index] = rule.percentage
-            except ValueError:
-                continue
-            parsed_formula[element] = ParseResults(formula)
+            _, field = parsed_formula[element][0].split('.')
+            # in formula model definition, percentages are accessible through the rule field
+            rule = formula.rule
+            percentage = getattr(rule, field, None)
+            if not percentage:
+                raise InvalidExpression('percentage does not exist')
+            parsed_formula[element][0] = percentage
         return parsed_formula
 
     def run(self, parsed_formula, sale):
@@ -326,10 +332,11 @@ class RulesExecutor:
         self.rule_handler = RuleHandler(data_lookup)
         self.formula_handler = FormulaHandler(data_lookup)
 
-    def execute(self, rule: Rule, sale: Sale):
+    def execute(self, percentage: Percentages, sale: Sale):
         try:
-            parsed_rule = self.rule_handler.parse(rule)
-            parsed_formula = self.formula_handler.parse(rule)
+            parsed_rule = self.rule_handler.parse(percentage)
+            formula = percentage.formula
+            parsed_formula = self.formula_handler.parse(formula)
         except ParseException as e:
             logger.exception(str(e))
             logger.error('Incorrect rule expression')
