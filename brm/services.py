@@ -150,7 +150,6 @@ def is_compound_expression(expression):
         any(isinstance(item, str) for item in expression)
 
 
-
 class RuleValidator:
 
     active_rules: list = []
@@ -189,11 +188,13 @@ class RuleValidator:
             _validate(parsed_rule)
 
         for rule in parsed_rule:
+            # omit cases in which parsed_rule component is a binary operator
+            if not isinstance(rule, ParseResults):
+                continue
             _validate(rule)
 
     def validate_expression(self, rule):
         try:
-            breakpoint()
             [parsed_rule] = self.validator_parser.parse_string(rule)
             self.validate(parsed_rule)
             return parsed_rule

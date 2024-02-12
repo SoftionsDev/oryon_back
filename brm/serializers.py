@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 class PercentagesReadSerializer(serializers.ModelSerializer):
 
     created_at = serializers.DateTimeField(format='%Y-%m-%d')
+    has_formula = serializers.BooleanField()
 
     class Meta:
         model = Percentages
@@ -33,8 +34,16 @@ class PercentagesWriteSerializer(serializers.Serializer):
         try:
             validator.validate_expression(value)
         except Exception as e:
+            logger.exception(e)
             raise ValidationError('rule does not compliant the requirements')
         return value.lower()
+
+    def validate(self, data):
+        decimal_fields = ['director', 'manager', 'commercial', 'assistant']
+        for field in decimal_fields:
+            if data.get(field) == 0:
+                raise ValidationError(f"{field} cannot be 0.")
+        return data
 
     def save(self, **kwargs):
         try:

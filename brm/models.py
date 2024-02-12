@@ -26,6 +26,10 @@ class Percentages(BaseModel):
             self.assistant
         ]
 
+    @property
+    def has_formula(self):
+        return self.formula is not None
+
 
 class Formula(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)

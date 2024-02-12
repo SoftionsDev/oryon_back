@@ -11,7 +11,13 @@ class Commission(BaseModel):
     sale = models.OneToOneField(Sale, on_delete=models.DO_NOTHING)
     amount = models.DecimalField(max_digits=20, decimal_places=2)
     percentage = models.ForeignKey(Percentages, on_delete=models.DO_NOTHING)
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, related_name='commissions'
+    )
     
     def __str__(self):
         return f"Commission {self.id}"
+
+
+
+
