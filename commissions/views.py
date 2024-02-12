@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from brm.models import Rule
+from brm.models import Percentages
 from brm.services import data_lookup, RulesExecutor
 from commissions.models import Commission
 from commissions.serializer import CommissionReadSerializer
@@ -25,24 +25,26 @@ class CommissionViews(ViewSet):
     @action(methods=['POST'], detail=False, name='generate')
     def generate(self, request):
         rules_handler = RulesExecutor(data_lookup)
-        result = {'report': []}
-        rules = Rule.objects.filter(is_active=True).order_by('-created_at')
+        result = {'commissions': []}
+        percentages = Percentages.objects.filter(
+            is_active=True
+        ).order_by('-created_at').select_related('formula')
         for sale in Sale.objects.filter(commissioned=False).iterator():
-            for rule in rules:
-                commission = rules_handler.execute(rule, sale)
+            for percentage in percentages:
+                commission = rules_handler.execute(percentage, sale)
                 if not commission:
                     continue
                 Commission.objects.create(
                     id=uuid.uuid4(),
                     sale=sale,
                     amount=commission,
-                    rule=rule,
+                    percentage=percentage,
                     user=sale.user
                 )
                 sale.commissioned = True
                 sale.save()
 
-                result['report'].append({
+                result['commissions'].append({
                     'sales_id': str(sale.id),
                     'commission': sale.commissioned,
                     'amount': commission
