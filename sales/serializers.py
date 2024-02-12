@@ -14,9 +14,9 @@ from utils.serializers import CustomDecimalField
 
 class SaleReadSerializer(serializers.ModelSerializer):
 
-    user = serializers.SerializerMethodField()
-    store = serializers.SerializerMethodField()
-    product = serializers.SerializerMethodField()
+    user = UserSerializer(context={'fields': ['code', 'email']})
+    store = StoreReadSerializer(context={'fields': ['code', 'name']})
+    product = ProductSerializer(context={'fields': ['code', 'name']})
 
     class Meta:
         model = Sale
@@ -24,21 +24,6 @@ class SaleReadSerializer(serializers.ModelSerializer):
             'id', 'user', 'store', 'product', 'date',
             'price', 'type', 'commission_type', 'commissioned'
         )
-
-    def get_user(self, obj):
-        desired_fields = ['code', 'email']
-        serializer = UserSerializer(obj.user, context={'fields': desired_fields})
-        return serializer.data
-
-    def get_store(self, obj):
-        desired_fields = ['code', 'name']
-        serializer = StoreReadSerializer(obj.store, context={'fields': desired_fields})
-        return serializer.data
-
-    def get_product(self, obj):
-        desired_fields = ['code', 'name']
-        serializer = ProductSerializer(obj.product, context={'fields': desired_fields})
-        return serializer.data
 
 
 class SalesWriteSerializer(serializers.Serializer):
