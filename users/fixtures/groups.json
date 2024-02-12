@@ -1,0 +1,23 @@
+[
+  {
+    "model": "auth.group",
+    "fields": {
+      "id": 1,
+      "name": "admin"
+    }
+  },
+  {
+    "model": "auth.group",
+    "fields": {
+      "id": 2,
+      "name": "manager"
+    }
+  },
+  {
+    "model": "auth.group",
+    "fields": {
+      "id": 3,
+      "name": "collaborator"
+    }
+  }
+]
