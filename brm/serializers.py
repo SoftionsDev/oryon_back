@@ -79,7 +79,6 @@ class FormulaWriteSerializer(serializers.Serializer):
     rule = serializers.CharField()
 
     def validate_formula(self, value):
-        breakpoint()
         validator = FormulaValidator()
         try:
             validator.validate_expression(value)
