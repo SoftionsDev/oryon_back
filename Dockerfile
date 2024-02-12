@@ -33,5 +33,7 @@ COPY ./database_healthcheck.sh /tmp/
 WORKDIR /app
 ENTRYPOINT ["bash", "/tmp/database_healthcheck.sh"]
 
+ENV DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
+
 CMD python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000
 

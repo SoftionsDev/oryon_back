@@ -16,7 +16,7 @@ class SalesViews(APIView):
         if self.request.method == 'GET':
             permission_classes = [IsAuthenticated]
         else:
-            permission_classes = [IsAdmin|IsManager]
+            permission_classes = [IsAdmin | IsManager]
         return [permission() for permission in permission_classes]
 
     def get(self, request, id=None):
