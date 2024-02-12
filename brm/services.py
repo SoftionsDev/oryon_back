@@ -150,8 +150,12 @@ def is_compound_expression(expression):
         any(isinstance(item, str) for item in expression)
 
 
+<<<<<<< Updated upstream
 
 class ExpressionValidator:
+=======
+class RuleValidator:
+>>>>>>> Stashed changes
 
     active_rules: list = []
     default_exception = 'rule has not a proper structure'
@@ -188,6 +192,18 @@ class ExpressionValidator:
                 continue
             raise InvalidExpression(self.default_exception)
 
+<<<<<<< Updated upstream
+=======
+        if not is_compound_expression(parsed_rule):
+            _validate(parsed_rule)
+
+        for rule in parsed_rule:
+            # omit cases in which parsed_rule component is a binary operator
+            if not isinstance(rule, ParseResults):
+                continue
+            _validate(rule)
+
+>>>>>>> Stashed changes
     def validate_expression(self, rule):
         try:
             [parsed_rule] = self.validator_parser.parse_string(rule)

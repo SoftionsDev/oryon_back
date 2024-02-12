@@ -6,7 +6,7 @@ from commissions.models import Commission
 class CommissionReadSerializer(serializers.ModelSerializer):
 
     sale = serializers.CharField(source='sale.id')
-    rule = serializers.CharField(source='rule.name')
+    rule = serializers.CharField(source='percentage.name')
     user = serializers.CharField(source='user.code')
 
     class Meta:

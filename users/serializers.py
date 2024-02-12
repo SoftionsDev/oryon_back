@@ -92,3 +92,47 @@ class CommercialSerializer(serializers.ModelSerializer):
 
         commercial.save()
         return commercial
+
+
+class CommissionSerializer(serializers.Serializer):
+    product = serializers.CharField(source='sale.product.code')
+    description = serializers.CharField(source='sale.product.name')
+    base_amount = serializers.DecimalField(
+        source='sale.price', max_digits=10, decimal_places=2
+    )
+    percentage = serializers.DecimalField(
+        source='percentage.formula.percentage', max_digits=5, decimal_places=2
+    )
+    commission_amount = serializers.DecimalField(
+        source='amount', max_digits=20, decimal_places=2
+    )
+
+
+class UserCommissionSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    store = serializers.SerializerMethodField()
+    city = serializers.SerializerMethodField()
+    region = serializers.SerializerMethodField()
+    commissions = CommissionSerializer(source='commissions_set', many=True)
+    total = serializers.DecimalField(
+        source='total_amount',
+        max_digits=20,
+        decimal_places=2
+    )
+
+    def get_store(self, obj):
+        if not obj.commissions.exists():
+            return None
+        return obj.commissions.first().sale.store.name
+
+    def get_city(self, obj):
+        if not obj.commissions.exists():
+            return None
+        return obj.commissions.first().sale.store.city.name
+
+    def get_region(self, obj):
+        if not obj.commissions.exists():
+            return None
+        return obj.commissions.first().sale.store.city.region.name
