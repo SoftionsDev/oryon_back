@@ -35,6 +35,7 @@ MATH_FUNCTIONS = {
 
 model_fields_cache = {}
 
+
 def find_model_by_name(model_name):
     model_name = model_name.lower()
     for model in apps.get_models():
@@ -342,6 +343,10 @@ class RulesExecutor:
             logger.exception(str(e))
             logger.error('Incorrect rule expression')
             raise
+        except AttributeError as e:
+            logger.exception(str(e))
+            logger.error('Incorrect rule expression')
+            return False
 
         if not self.rule_handler.run(parsed_rule, sale):
             return False

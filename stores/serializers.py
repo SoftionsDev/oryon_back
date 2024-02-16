@@ -7,7 +7,10 @@ from utils.serializers import SelectableFieldsModelSerializer
 
 class RegionReadSerializer(SelectableFieldsModelSerializer):
 
-    manager = UserSerializer(read_only=True, context={'fields': ['code', 'email']})
+    manager = UserSerializer(
+        read_only=True,
+        context={'fields': ['code', 'email', 'first_name', 'last_name']}
+    )
 
     class Meta:
         model = Region
@@ -30,7 +33,10 @@ class RegionWriteSerializer(serializers.Serializer):
 
 class CityReadSerializer(SelectableFieldsModelSerializer):
     region = RegionReadSerializer(read_only=True, context={'fields': ['code', 'name']})
-    manager = UserSerializer(read_only=True, context={'fields': ['code', 'email']})
+    manager = UserSerializer(
+        read_only=True,
+        context={'fields': ['code', 'email', 'first_name', 'last_name']}
+    )
 
     class Meta:
         model = City
@@ -58,8 +64,14 @@ class CityWriteSerializer(serializers.Serializer):
 
 class StoreReadSerializer(SelectableFieldsModelSerializer):
 
-    manager = UserSerializer(read_only=True, context={'fields': ['code', 'email']})
-    city = CityReadSerializer(read_only=True, context={'fields': ['code', 'name']})
+    manager = UserSerializer(
+        read_only=True,
+        context={'fields': ['code', 'email', 'first_name', 'last_name']}
+    )
+    city = CityReadSerializer(
+        read_only=True,
+        context={'fields': ['code', 'name']}
+    )
 
     class Meta:
         model = Store
